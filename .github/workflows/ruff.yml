@@ -1,0 +1,24 @@
+name: Ruff Lint and Format
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: Ruff Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Ruff Linter
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "check --output-format=github ."
+          
+  format:
+    name: Ruff Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Ruff Format Check
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "format --check --diff ."

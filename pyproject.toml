@@ -1,0 +1,35 @@
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+indent-width = 4
+exclude = [".git", ".venv", "__pycache__", "build", "dist", "migrations"]
+
+[tool.ruff.lint]
+extend-select = ["F", "W", "E", "I", "N", "UP", "C4", "FA", "ISC", "ICN", "RET", "SIM"]
+ignore = ["E501", "W191", "W291", "W292", "W293", "N802", "N803", "N806"]
+
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = ["classmethod"]
+staticmethod-decorators = ["staticmethod"]
+
+[tool.ruff.lint.isort]
+known-first-party = []
+lines-between-types = 1
+combine-as-imports = true
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["frozenset"]
+
+[tool.ruff.format]
+indent-style = "space"
+quote-style = "double"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+"**/migrations/*" = ["F841"]
+
+[tool.pytest.ini_options]
+testpaths = "test"
+pythonpath = '.'
