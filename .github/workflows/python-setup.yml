@@ -1,0 +1,39 @@
+name: Python Setup
+
+on:
+  workflow_call:
+    outputs:
+      python-version:
+        description: "Python version"
+        value: ${{ jobs.setup.outputs.python-version }}
+      cache-key:
+        description: "Cache key"
+        value: ${{ jobs.setup.outputs.cache-key }}
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      python-version: ${{ steps.read-python-version.outputs.python_version }}
+      cache-key: ${{ steps.generate-cache-key.outputs.cache-key }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Read Python version from .python-version
+        id: read-python-version
+        run: |
+          if [ -f .python-version ]; then
+            PYTHON_VERSION=$(cat .python-version | head -1 | tr -d '\n')
+            echo "Python version from .python-version: $PYTHON_VERSION"
+            echo "python_version=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo ".python-version file not found, using default 3.10"
+            echo "python_version=3.10" >> $GITHUB_OUTPUT
+          fi
+            
+      - name: Generate cache key
+        id: generate-cache-key
+        run: |
+          CACHE_KEY="${{ runner.os }}-python-${{ steps.read-python-version.outputs.python_version }}-pip-${{ hashFiles('**/requirements.txt') }}"
+          echo "cache-key=$CACHE_KEY" >> $GITHUB_OUTPUT
