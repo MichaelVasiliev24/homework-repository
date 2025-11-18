@@ -1,0 +1,7 @@
+# Python 3.12.3
+
+# For tests
+pytest==8.4.2
+
+# For linting and formatting
+ruff==0.14.2
