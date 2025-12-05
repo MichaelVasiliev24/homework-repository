@@ -1,8 +1,12 @@
 all:
-    gcc -Wall -std=c99 list.c main.c -o program
+	gcc list.c main.c -o program
 
 run:
-    ./program
+	./program
+
+test:
+	gcc test_list.c list.c -o test_program
+	./test_program
 
 clean:
-    rm -f program
+	rm -f program test_program
