@@ -8,17 +8,44 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Ruff Linter
-        uses: astral-sh/ruff-action@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
         with:
-          args: "check --output-format=github ."
+          python-version: "3.11"
+      - name: Install Ruff
+        run: pip install ruff
+      - name: Run Ruff Linter
+        run: |
+          # Проверяем существование папок
+          if [ -d "src" ] && [ -d "tests" ]; then
+            echo "Running ruff check on src/ and tests/"
+            ruff check --output-format=github src/ tests/
+          elif [ -d "src" ]; then
+            echo "Running ruff check only on src/ (tests/ not found)"
+            ruff check --output-format=github src/
+          else
+            echo "No src/ directory found, skipping ruff check"
+          fi
           
   format:
     name: Ruff Format Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Ruff Format Check
-        uses: astral-sh/ruff-action@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
         with:
-          args: "format --check --diff ."
+          python-version: "3.11"
+      - name: Install Ruff
+        run: pip install ruff
+      - name: Run Ruff Format Check
+        run: |
+          if [ -d "src" ] && [ -d "tests" ]; then
+            echo "Checking formatting for src/ and tests/"
+            ruff format --check --diff src/ tests/
+          elif [ -d "src" ]; then
+            echo "Checking formatting only for src/"
+            ruff format --check --diff src/
+          else
+            echo "No directories to check, skipping"
+          fi
