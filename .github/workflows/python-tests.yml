@@ -36,10 +36,19 @@ jobs:
           
       - name: Run tests
         run: |
-          # Простая проверка и запуск
-          if [ -d "tests" ]; then
+          # Проверяем существование папки tests и файлов
+          if [ -d "tests" ] && find tests -name "*.py" | grep -q .; then
             echo "Running tests from tests/ directory..."
+            
+            # Устанавливаем PYTHONPATH для импорта из src
+            if [ -d "src" ]; then
+              export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
+            fi
+            
             python -m pytest tests/ -v
+          elif find . -name "*test*.py" -type f | grep -q .; then
+            echo "Found test files outside tests/ directory..."
+            python -m pytest -v
           else
-            echo "No tests directory found"
+            echo "No test files found, skipping tests"
           fi
