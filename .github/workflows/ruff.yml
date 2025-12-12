@@ -8,17 +8,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Ruff Linter
-        uses: astral-sh/ruff-action@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
         with:
-          args: "check --output-format=github ."
+          python-version: "3.11"  # Согласуй с твоим .python-version
+      - name: Install Ruff
+        run: pip install ruff
+      - name: Run Ruff Linter
+        run: ruff check --output-format=github src/ tests/
           
   format:
     name: Ruff Format Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Ruff Format Check
-        uses: astral-sh/ruff-action@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
         with:
-          args: "format --check --diff ."
+          python-version: "3.11"
+      - name: Install Ruff
+        run: pip install ruff
+      - name: Run Ruff Format Check
+        run: ruff format --check --diff src/ tests/
