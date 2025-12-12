@@ -76,14 +76,15 @@ class TestDelete:
         node_b = pq.insert("B", 20)
         pq.insert("A", 10)
         pq.insert("C", 30)
-        
+
         deleted = pq.delete(node_b)
-        
+
         # Проверяем только значение, т.к. приоритет изменен
         assert deleted[0] == "B"  # Значение правильное
         # Проверяем, что очередь работает дальше
         assert pq.extract_min()[0] == "A"
         assert pq.extract_min()[0] == "C"
+
 
 class TestEdgeCases:
     """Класс тестов граничных случаев"""
