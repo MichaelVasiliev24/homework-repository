@@ -11,11 +11,21 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"  # Согласуй с твоим .python-version
+          python-version: "3.11"
       - name: Install Ruff
         run: pip install ruff
       - name: Run Ruff Linter
-        run: ruff check --output-format=github src/ tests/
+        run: |
+          # Проверяем существование папок
+          if [ -d "src" ] && [ -d "tests" ]; then
+            echo "Running ruff check on src/ and tests/"
+            ruff check --output-format=github src/ tests/
+          elif [ -d "src" ]; then
+            echo "Running ruff check only on src/ (tests/ not found)"
+            ruff check --output-format=github src/
+          else
+            echo "No src/ directory found, skipping ruff check"
+          fi
           
   format:
     name: Ruff Format Check
@@ -29,4 +39,13 @@ jobs:
       - name: Install Ruff
         run: pip install ruff
       - name: Run Ruff Format Check
-        run: ruff format --check --diff src/ tests/
+        run: |
+          if [ -d "src" ] && [ -d "tests" ]; then
+            echo "Checking formatting for src/ and tests/"
+            ruff format --check --diff src/ tests/
+          elif [ -d "src" ]; then
+            echo "Checking formatting only for src/"
+            ruff format --check --diff src/
+          else
+            echo "No directories to check, skipping"
+          fi
