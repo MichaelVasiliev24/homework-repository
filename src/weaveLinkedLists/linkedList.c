@@ -31,7 +31,7 @@ Node* createListFromArray(int arr[], int size)
     return head;
 }
 
-void freeList(Node* head)
+void deleteList(Node* head)
 {
     Node* current = head;
     while (current != NULL) {
