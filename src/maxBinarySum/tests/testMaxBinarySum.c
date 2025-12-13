@@ -1,5 +1,5 @@
 #include "testMaxBinarySum.h"
-#include "maxBinarySum.h"
+#include "../maxBinarySum/maxBinarySum.h"
 #include <stdio.h>
 #include <assert.h>
 
