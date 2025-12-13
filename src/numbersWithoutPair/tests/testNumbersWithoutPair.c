@@ -1,4 +1,4 @@
-#include "numbersWithoutPair.h"
+#include "../numbersWithoutPair/numbersWithoutPair.h"
 #include "testNumbersWithoutPair.h"
 #include <stdio.h>
 #include <assert.h>
