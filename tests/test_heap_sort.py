@@ -1,7 +1,7 @@
 import pytest
 
-from src.heap_sort import heap_sort
-from src.other_sorts import bubble_sort, merge_sort
+from src.heap_sort.heap_sort import heap_sort
+from src.heap_sort.other_sorts import bubble_sort, merge_sort
 
 
 def test_heap_sort_empty(empty_list):
