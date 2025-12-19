@@ -31,6 +31,6 @@ line-ending = "auto"
 "**/migrations/*" = ["F841"]
 
 [tool.pytest.ini_options]
-testpaths = "tests"
-pythonpath = '.'
-addopts = "-v --import-mode=append"
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v --import-mode=importlib"

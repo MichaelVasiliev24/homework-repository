@@ -36,10 +36,42 @@ jobs:
           
       - name: Run tests
         run: |
-          # Простая проверка и запуск
+          echo "=== Starting CI Test Run ==="
+          echo "Python version: ${{ needs.setup.outputs.python-version }}"
+          
+          # Проверяем наличие папки tests
           if [ -d "tests" ]; then
-            echo "Running tests from tests/ directory..."
-            python -m pytest tests/ -v
+            echo "Found tests/ directory"
+            
+            # Проверяем, есть ли файлы с тестами
+            TEST_FILES=$(find tests -name "*.py" -type f 2>/dev/null)
+            
+            if [ -n "$TEST_FILES" ]; then
+              echo "Found Python files in tests/:"
+              echo "$TEST_FILES" | sed 's/^/  /'
+              echo ""
+              echo "Running tests with pytest..."
+              python -m pytest tests/ -v
+              echo "Tests completed"
+            else
+              echo "No Python files found in tests/ directory"
+              echo "Skipping test execution"
+            fi
           else
-            echo "No tests directory found"
+            echo "No tests/ directory found"
+            echo "Skipping test execution"
           fi
+          
+          echo ""
+          echo "=== Basic Environment Validation ==="
+          
+          # Базовая проверка окружения
+          python -c "print('Python environment is functional')"
+          
+          # Проверяем установлен ли pytest
+          if python -c "import pytest; print('pytest is available')" 2>/dev/null; then
+            echo "pytest version: $(python -c "import pytest; print(pytest.__version__)")"
+          fi
+          
+          echo ""
+          echo "CI process completed successfully"
