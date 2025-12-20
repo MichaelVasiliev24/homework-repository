@@ -119,3 +119,30 @@ def test_integration_multiple_functions(add_two, multiply_three, sum_three):
             uncurried_result = uncurried(*args)
 
             assert curried_result == uncurried_result
+
+
+def test_curry_incorrect_arity_immediate_error_with_fixtures(
+    add_two, multiply_three, constant_func, identity
+):
+    """Тест проверки ошибок арности с использованием фикстур"""
+
+    with pytest.raises(ValueError):
+        curry(add_two, 3)  # add_two имеет 2 параметра
+
+    with pytest.raises(ValueError):
+        curry(multiply_three, 5)  # multiply_three имеет 3 параметра
+
+    with pytest.raises(ValueError):
+        curry(add_two, 1)
+
+    with pytest.raises(ValueError):
+        curry(multiply_three, 2)
+
+    with pytest.raises(ValueError):
+        curry(add_two, 0)
+
+    with pytest.raises(ValueError):
+        curry(identity, 0)  # identity имеет 1 параметр
+
+    with pytest.raises(ValueError):
+        curry(constant_func, 1)
