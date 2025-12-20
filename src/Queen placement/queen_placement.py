@@ -1,85 +1,201 @@
-def brute_force_solution(N):
-    import itertools
+"""
+Описание: Этот модуль содержит три реализации алгоритма
+для подсчета количества корректных расстановок N ферзей на шахматной доске размером N x N.
 
-    counter = 0
-    for perm_of_columns in itertools.permutations(range(N)):
-        flag = True
-        for i_row in range(N - 1):
-            for j_row in range(i_row + 1, N):
-                if abs(i_row - j_row) == abs(
-                    perm_of_columns[i_row] - perm_of_columns[j_row]
+Ферзь может перемещаться по горизонтали, вертикали и диагонали.
+Расстановка считается корректной, если ни один ферзь не атакует другого.
+
+Реализации алгоритма:
+1. Переборная через генерацию всех перестановок
+2. Рекурсивная с отслеживанием занятых столбцов и диагоналей
+3. Оптимизированная рекурсивный с использованием битовых масок
+"""
+
+import itertools
+
+
+def brute_force_solution(board_size: int) -> int:
+    """
+    Переборное решение через генерацию всех перестановок.
+
+    Алгоритм:
+    1. Генерируем все перестановки чисел от 0 до N-1, где индекс — строка,
+       а значение — столбец ферзя.
+    2. Для каждой перестановки проверяем, не находятся ли какие-либо два ферзя
+       на одной диагонали (на одной строке или столбце они гарантированно не
+       находятся из-за структуры перестановки).
+    3. Считаем количество безопасных расстановок.
+
+
+    Принимаем:
+        board_size (int): Размер доски и количество ферзей.
+
+    Возвращаем:
+        int: Количество безопасных расстановок.
+    """
+    safe_placements_count = 0
+
+    # Генерируем все возможные расстановки ферзей по столбцам
+    for column_permutation in itertools.permutations(range(board_size)):
+        is_safe = True
+
+        # Проверяем все пары ферзей на конфликт по диагоналям
+        for first_row in range(board_size - 1):
+            for second_row in range(first_row + 1, board_size):
+                # Два ферзя на одной диагонали, если разность строк равна разности столбцов (по модулю)
+                if abs(first_row - second_row) == abs(
+                    column_permutation[first_row] - column_permutation[second_row]
                 ):
-                    flag = False
+                    is_safe = False
                     break
-            if not flag:
+            if not is_safe:
                 break
-        if flag:
-            counter += 1
-    return counter
+
+        # Если ни один ферзь не атакует другого, увеличиваем счетчик
+        if is_safe:
+            safe_placements_count += 1
+
+    return safe_placements_count
 
 
-def recursive_solution(N):
-    occupied_columns, occupied_main_diagonals, occupied_secondary_diagonals = (
-        set(),
-        set(),
-        set(),
-    )
-    counter = 0
+def recursive_solution(board_size: int) -> int:
+    """
+    Рекурсивное решение с отслеживанием занятых линий (столбцы, диагонали).
 
-    def recursive_function_for_rows(current_row):
-        nonlocal counter
+    Алгоритм:
+    Размещаем ферзей по одному на каждой строке, начиная с первой.
+    Для каждой строки перебираем все столбцы и проверяем, не атакует ли
+    текущая позиция уже размещенных ферзей по вертикали или диагоналям.
 
-        if current_row == N:
-            counter += 1
+    Для ускорения проверок используем множества занятых позиций:
+        - Занятые столбцы
+        - Занятые восходящие диагонали (row - col)
+        - Занятые нисходящие диагонали (row + col)
+
+    Принимаем:
+        board_size (int): Размер доски и количество ферзей.
+
+    Возвращаем:
+        int: Количество безопасных расстановок.
+    """
+    # Множества для отслеживания занятых линий
+    occupied_columns = set()  # множество занятых столбцов
+    occupied_main_diagonals = set()  # множество занятых главных диагоналей, определяются постоянной разностью row - col
+    occupied_secondary_diagonals = (
+        set()
+    )  # множество занятых побочных диагоналей, определяются постоянной суммой row + col
+
+    safe_placements_count = 0
+
+    def place_queen_in_row(current_row: int) -> None:
+        """
+        Рекурсивно размещает ферзя в текущей строке.
+
+        Принимаем:
+            current_row (int): Текущая строка для размещения ферзя (индексация начинается с 0).
+        """
+        nonlocal safe_placements_count
+
+        # Базовый случай: все ферзи успешно размещены
+        if current_row == board_size:
+            safe_placements_count += 1
             return
 
-        for i_column in range(N):
-            if (
-                i_column not in occupied_columns
-                and (current_row - i_column) not in occupied_main_diagonals
-                and (current_row + i_column) not in occupied_secondary_diagonals
-            ):
-                occupied_columns.add(i_column)
-                occupied_main_diagonals.add(current_row - i_column)
-                occupied_secondary_diagonals.add(current_row + i_column)
+        # Перебираем все возможные столбцы в текущей строке
+        for column in range(board_size):
+            # Проверяем, безопасна ли текущая позиция
+            is_column_free = column not in occupied_columns
+            is_main_diag_free = (current_row - column) not in occupied_main_diagonals
+            is_sec_diag_free = (
+                current_row + column
+            ) not in occupied_secondary_diagonals
 
-                recursive_function_for_rows(current_row + 1)
+            if is_column_free and is_main_diag_free and is_sec_diag_free:
+                # Занимаем линии, которые контролирует этот ферзь
+                occupied_columns.add(column)
+                occupied_main_diagonals.add(current_row - column)
+                occupied_secondary_diagonals.add(current_row + column)
 
-                occupied_columns.remove(i_column)
-                occupied_main_diagonals.remove(current_row - i_column)
-                occupied_secondary_diagonals.remove(current_row + i_column)
-        return
+                # Рекурсивно размещаем следующего ферзя
+                place_queen_in_row(current_row + 1)
 
-    recursive_function_for_rows(current_row=0)
-    return counter
+                # Освобождаем линии для backtracking (возврата)
+                occupied_columns.remove(column)
+                occupied_main_diagonals.remove(current_row - column)
+                occupied_secondary_diagonals.remove(current_row + column)
+
+    # Начинаем размещение с первой строки
+    place_queen_in_row(current_row=0)
+    return safe_placements_count
 
 
-def bitmask_solution(N):
-    counter = 0
-    initial_mask = (1 << N) - 1
+def bitmask_solution(board_size: int) -> int:
+    """
+    Оптимизированное решение с использованием битовых масок.
 
-    def recursive_function_bitmask_solution(
-        columns, secondary_diagonals, main_diagonals
-    ):
-        nonlocal counter
+    Алгоритм:
+    Использует целые числа как битовые массивы для представления занятых позиций.
+    Каждый бит представляет конкретный столбец. Это позволяет выполнять операции
+    проверки и установки за O(1) с помощью битовых операций.
 
-        if columns == initial_mask:
-            counter += 1
+    Преимущества:
+        - Экономия памяти (3 целых числа вместо 3 множеств)
+        - Высокая скорость битовых операций
+        - Автоматический контроль за пределами доски через битовые сдвиги
+
+    Принимаем:
+        board_size (int): Размер доски и количество ферзей.
+
+    Возвращаем:
+        int: Количество безопасных расстановок.
+    """
+    safe_placements_count = 0
+
+    # Маска всех допустимых позиций: N младших битов установлены в 1
+    full_mask = (1 << board_size) - 1
+
+    def place_queens_with_bitmask(
+        columns_mask: int, main_diagonals_mask: int, secondary_diagonals_mask: int
+    ) -> None:
+        """
+        Рекурсивно размещает ферзей с использованием битовых масок.
+
+        Принимаем:
+            columns_mask (int): Биты установлены для занятых столбцов.
+            main_diagonals_mask (int): Биты установлены для занятых главных диагоналей.
+            secondary_diagonals_mask (int): Биты установлены для занятых побочных диагоналей.
+        """
+        nonlocal safe_placements_count
+
+        # Все ферзи размещены, если заняты все столбцы
+        if columns_mask == full_mask:
+            safe_placements_count += 1
             return
 
-        available_positions = initial_mask & ~(
-            columns | secondary_diagonals | main_diagonals
+        # Определяем доступные позиции в текущей строке:
+        # Берем все столбцы (~ инвертирует маску), но ограничиваем размером доски
+        free_positions = full_mask & ~(
+            columns_mask | secondary_diagonals_mask | main_diagonals_mask
         )
 
-        while available_positions:
-            current_pos = available_positions & -available_positions
-            recursive_function_bitmask_solution(
-                (columns | current_pos),
-                (secondary_diagonals | current_pos) >> 1,
-                (main_diagonals | current_pos) << 1,
-            )
-            available_positions ^= current_pos
-        return
+        # Последовательно занимаем каждую доступную позицию
+        while free_positions:
+            # Выбираем младший установленный бит (самую правую свободную позицию)
+            current_position = free_positions & -free_positions
 
-    recursive_function_bitmask_solution(0, 0, 0)
-    return counter
+            # Рекурсивно размещаем оставшихся ферзей:
+            # 1. columns_mask | current_position — занимаем текущий столбец
+            # 2. (secondary_diagonals_mask | current_position) >> 1 — сдвиг главной диагонали для следующей строки
+            # 3. (main_diagonals_mask | current_position) << 1 — сдвиг побочной диагонали для следующей строки
+            place_queens_with_bitmask(
+                columns_mask | current_position,
+                (main_diagonals_mask | current_position) << 1,
+                (secondary_diagonals_mask | current_position) >> 1,
+            )
+
+            # Убираем текущую позицию из свободных для следующей итерации
+            free_positions ^= current_position
+
+    # Инициализируем рекурсию с пустой доской
+    place_queens_with_bitmask(0, 0, 0)
+    return safe_placements_count
