@@ -1,3 +1,6 @@
+import inspect
+
+
 def curry(func, arity):
     """Преобразует функцию от нескольких аргументов в цепочку функций от одного аргумента"""
     if not callable(func):
@@ -5,6 +8,21 @@ def curry(func, arity):
 
     if arity < 0:
         raise ValueError(f"Арность не может быть отрицательной: {arity}")
+
+    # Проверяем арность через inspect
+    # Получение сигнатуры в try-except
+    param_count = None
+    try:
+        sig = inspect.signature(func)
+        params = list(sig.parameters.values())
+        param_count = len(params)
+    except (ValueError, TypeError):
+        pass
+    if param_count is not None and arity != param_count:
+        raise ValueError(
+            f"Указанная арность ({arity}) не соответствует количеству "
+            f"аргументов функции ({param_count})"
+        )
 
     if arity == 0:
         return lambda: func()
